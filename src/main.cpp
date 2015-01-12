@@ -18,7 +18,7 @@ void read_skin(const char *filename)
 {
 	Skin skin(filename);
 	skin.showHeadInfo();
-	skin.showMaterialInfo();
+	//skin.showMaterialInfo();
 	skin.save();
 }
 
@@ -29,13 +29,18 @@ void read_smm(const char *filename)
 	smm.showMaterialInfo();
 }
 	
+
+
 void genBoneInfo(int argc, char* argv[])
 {
 	Matrix4f * list[200] = {0};
-	for(int i = 1; i < argc; i ++)
+	for(int d = 9; d >= 0; d--)
 	{
-		Skin skin(argv[i]);
-		skin.calc(list);
+		for(int i = 1; i < argc; i++)
+		{
+			Skin skin(argv[i]);
+			skin.calc(list, d);
+		}
 	}
 
 	ofstream fout("out/m.bone");
@@ -49,9 +54,24 @@ void genBoneInfo(int argc, char* argv[])
 			Vec3f trans, rot, scale;
 			list[i]->decompose(trans, rot, scale);
 			fout << i << endl;
-			fout << trans.x << " " << trans.y << " " << trans.z << endl;
-			fout << rot.x << " " << rot.y << " " << rot.z << endl;
-			fout << scale.x << " " << scale.y << " " << scale.z << endl;
+			fout << fmt(trans.x) << " " << fmt(trans.y) << " " << fmt(trans.z) << endl;
+			fout << fmt(rot.x) << " " << fmt(rot.y) << " " << fmt(rot.z) << endl;
+	
+			if(scale.x - 1 > -0.1 && scale.x - 1 < 0.1)
+				scale.x = 1;
+			if(scale.y - 1 > -0.1 && scale.y - 1 < 0.1)
+				scale.y = 1;
+			if(scale.z - 1 > -0.1 && scale.z - 1 < 0.1)
+				scale.z = 1;
+			
+			if(scale.x + 1 > -0.1 && scale.x + 1 < 0.1)
+				scale.x = -1;
+			if(scale.y + 1 > -0.1 && scale.y + 1 < 0.1)
+				scale.y = -1;
+			if(scale.z + 1 > -0.1 && scale.z + 1 < 0.1)
+				scale.z = -1;
+
+			fout << scale.x << " " << scale.y << " " << scale.z << " " << endl;
 		}
 	}
 	fout.close();
@@ -91,6 +111,7 @@ int main(int argc, char* argv[])
 	//for(int i = 1; i < argc; i ++)
 	//	read_skel(argv[i]);
 	
+	read_skin("../system/shizhuang/sz_04.skin");
 	//read_skin("../system/avatargirl/ff01_00.skin");
 	//for(int i = 1; i < argc; i ++)
 	//	read_skin(argv[i]);
@@ -101,7 +122,7 @@ int main(int argc, char* argv[])
 	
 
 	//genBoneInfo(argc, argv);
-	genBoneLink(argc, argv);
+	//genBoneLink(argc, argv);
 	
 
 

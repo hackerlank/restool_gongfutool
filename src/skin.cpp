@@ -116,6 +116,7 @@ SkinMesh Skin::readSkinMesh(int idx)
 
 	}
 
+	cout << "baseIndex  " << m.baseIndex << "  " << m.vertNum << endl;
 	cout << "[Skin]readSkinMesh(" << idx << ") base:" << n << " lods: " << m.lodNum << endl;
 	
 	return m;
@@ -167,46 +168,79 @@ void Skin::showMaterialInfo()
 
 void Skin::save()
 {
-	ofstream fout("res/m.skin");
+	char name[128];
+	Util::fname(m_path, name);
+	string path = "out/";
+	path = path + name;
+	ofstream fout(path.c_str());
 
-	fout << m_mtlList[0].map[0] << endl;
+	fout << m_mtlList.size() << endl;
+	for(int i = 0; i < m_mtlList.size(); i++)
+	{
+		char name[128];
+		Util::fname(m_mtlList[i].map[0], name);
+		fout << name << endl;
+	}
 	fout << endl;
+
+
 	fout << m_vertList.size() << endl;
 	fout << endl;
 	for(int i = 0; i < m_vertList.size(); i++)
 	{
 		SkinVert t = m_vertList[i];
-		fout << t.pos.x << " " << t.pos.y << " " << t.pos.z << " " << t.uv.x << " " << t.uv.y << endl;
-		fout << t.bones.size() << endl;
+		fout << t.pos.x << " " << t.pos.y << " " << t.pos.z << " " << t.uv.x << " " << t.uv.y << " " << t.bones.size();
 		for(int j = 0; j < t.bones.size(); j++)
 		{
 			SkinBone bone = t.bones[j];
-			fout << bone.boneId << " " << bone.weight << endl;
+			fout << " " << bone.boneId << " " << bone.weight;
 			//fout << bone.boneId << " " << bone.weight << " " << bone.offset.x << " " << bone.offset.y << " " << bone.offset.z << endl;
 		}
 		fout << endl;
 	}
+
+
+	fout << m_meshList.size() << endl;
+	for(int i = 0; i < m_meshList.size(); i++)
+	{
+		SkinMesh m = m_meshList[i];
+		fout << m.mtlId << " " << m.baseFaces.size() << endl;
+		for(int j = 0; j < m.baseFaces.size(); j++)
+		{
+			MeshTri t = m.baseFaces[j];
+			fout << t.index[0] << " " << t.index[1] << " " << t.index[2] << endl;
+		}
+		fout << endl;
+	}
+
+
 	fout.close();
 
 }
 
 
-void Skin::calc(Matrix4f * omList[200])
+void Skin::calc(Matrix4f * omList[200], int d)
 {
 	Matrix4f* 	mlist[200] = {0};
 	Matrix4f* 	vlist[200] = {0};
 	int 		ilist[200] = {0};
+	int 		blist[200] = {0};
 	for(int i = 0; i < m_vertList.size(); i++)
 	{
 		SkinVert v = m_vertList[i];
 		for(int j = 0; j < v.bones.size(); j++)
 		{
 			SkinBone bone = v.bones[j];
+
 			if(omList[bone.boneId] == 0)
 			{
-				int idx  = ilist[bone.boneId];
-				if(idx >= 4)
+
+				if(blist[bone.boneId] < d) 
+				{
+					blist[bone.boneId] += 1;
 					continue;
+				}
+
 
 				Matrix4f* mMat;
 				Matrix4f* vMat;
@@ -222,20 +256,25 @@ void Skin::calc(Matrix4f * omList[200])
 					vMat = vlist[bone.boneId];
 				}
 
+				int idx  = ilist[bone.boneId];
 				int t = 0;
 				for(t = 0; t < idx; t++)
 				{
-					float dx = v.pos.x - mMat->c[t][0];
-					float dy = v.pos.y - mMat->c[t][1];
-					float dz = v.pos.z - mMat->c[t][2];
-					if(dx * dx + dy * dy + dz * dz < 1)
+					float dx = abs(v.pos.x - mMat->c[t][0]);
+					float dy = abs(v.pos.y - mMat->c[t][1]);
+					float dz = abs(v.pos.z - mMat->c[t][2]);
+					if(dx < 0.01 && dy < 0.01 && dz < 0.01)
 						break;
+
+					dx = abs(bone.offset.x - vMat->c[t][0]);
+					dy = abs(bone.offset.y - vMat->c[t][1]);
+					dz = abs(bone.offset.z - vMat->c[t][2]);
+					if(dx < 0.01 && dy < 0.01 && dz < 0.01)
+						break;
+
 				}
 				if(t < idx)
 					continue;
-
-
-				ilist[bone.boneId] = idx + 1;
 
 				mMat->c[idx][0] = v.pos.x;
 				mMat->c[idx][1] = v.pos.y;
@@ -246,22 +285,53 @@ void Skin::calc(Matrix4f * omList[200])
 				vMat->c[idx][1] = bone.offset.y;
 				vMat->c[idx][2] = bone.offset.z;
 				vMat->c[idx][3] = 1;
+
+				blist[bone.boneId] = 1;
+				ilist[bone.boneId] = idx + 1;
+
+				if(ilist[bone.boneId] >= 4)
+				{
+					Matrix4f* mat  = new Matrix4f((*vMat) * (mMat->inverted()));
+					Vec3f t, r, s;
+					mat->decompose(t, r, s);
+
+					float dt = sqrt(t.x * t.x + t.y * t.y + t.z * t.z);
+					float dx = abs(s.x * s.x - 1);
+					float dy = abs(s.y * s.y - 1);
+					float dz = abs(s.z * s.z - 1);
+					
+					if(d == 0 || dt < 1000 && dx < 0.2 && dy < 0.2 && dz < 0.2)
+					{
+						omList[bone.boneId] = mat;
+					}
+					else
+					{
+						ilist[bone.boneId] = 3;
+						for(int m = 0; m < 3; m++)
+						{
+							mMat->c[m][0] = mMat->c[m+1][0];
+							mMat->c[m][1] = mMat->c[m+1][1];
+							mMat->c[m][2] = mMat->c[m+1][2];
+							mMat->c[m][3] = mMat->c[m+1][3];
+							
+							vMat->c[m][0] = vMat->c[m+1][0];
+							vMat->c[m][1] = vMat->c[m+1][1];
+							vMat->c[m][2] = vMat->c[m+1][2];
+							vMat->c[m][3] = vMat->c[m+1][3];
+						}
+					}
+					
+				}
 			}
 		}
 	}
 
 	for(int i = 0; i < 200; i++)
 	{
-		Matrix4f* mMat;
-		Matrix4f* vMat;
-		mMat = mlist[i];
-		vMat = vlist[i];
-
-		if(mMat && vMat && omList[i] == 0 && ilist[i] >= 4)
-		{
-			omList[i] = new Matrix4f((*vMat) * (mMat->inverted()));
-		}
+		Matrix4f* mMat = mlist[i];
 		if(mMat) delete mMat;
+
+		Matrix4f* vMat = vlist[i];
 		if(vMat) delete vMat;
 	}
 }

@@ -2,6 +2,7 @@
 #define __SKEL_H__
 
 #include "define.h"
+#include "util.h"
 #include "utMath.h"
 
 

@@ -9,10 +9,13 @@
 #include "define.h"
 using namespace std;
 
+float fmt(float n);
+
 class Util
 {
 public:
 	static bool mkdir(const char* path);
+	static void fname(const char* path, char* dest);
 	static void fpath(const char* path, char* dest);
 	static void fcopy(const char* path, const char* dest, bool delflag = false);
 	static const char* guess(const char* data);

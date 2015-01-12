@@ -169,30 +169,48 @@ void Skel::showHeadInfo()
 
 }
 
-
 void Skel::save()
 {
+	int idx = -1;
+	int ilist[32] = {0};
+	char clist[32][5];
 
-	ofstream fout("res/m.skel");
-	
-
-	fout << m_frames.size() << endl;
 	for(int i = 0; i < m_frames.size(); i++)
 	{
 		SkelFrame frame = m_frames[i];
-		//fout << frame.name << endl;
-		fout << frame.time << endl;
-		for(int j = 0; j < frame.boneDatas.size(); j++)
+		if(idx == -1 || strcmp(clist[idx], frame.name) != 0)
 		{
-			BoneData dd = frame.boneDatas[j];
-			fout << dd.trans.x << " " << dd.trans.y << " " << dd.trans.z << endl;
-			fout << dd.rotat.x << " " << dd.rotat.y << " " << dd.rotat.z << endl;
-			fout << dd.mirror << endl;
+			idx++;
+		    strcpy(clist[idx], frame.name);
 		}
-
+		ilist[idx]++;
 	}
 
+	int cur = 0;
+	for(int t = 0; ilist[t] > 0; t++)
+	{
 
+		string path = "out/";
+		path = path + clist[t] + ".skel";
+		ofstream fout(path.c_str());
+		
+		fout << ilist[t] << endl;
+		for(int i = 0; i < ilist[t]; i++,cur++)
+		{
+			SkelFrame frame = m_frames[cur];
+			//fout << frame.name << endl;
+			fout << frame.time << endl;
+			for(int j = 0; j < frame.boneDatas.size(); j++)
+			{
+				BoneData dd = frame.boneDatas[j];
+				fout << fmt(dd.trans.x) << " " << fmt(dd.trans.y) << " " << fmt(dd.trans.z) << endl;
+				fout << fmt(dd.rotat.x) << " " << fmt(dd.rotat.y) << " " << fmt(dd.rotat.z) << endl;
+				fout << dd.mirror << endl;
+			}
+
+		}
+		fout.close();
+	}
 }
 
 
