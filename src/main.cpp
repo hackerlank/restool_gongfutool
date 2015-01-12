@@ -38,7 +38,7 @@ void genBoneInfo(int argc, char* argv[])
 		skin.calc(list);
 	}
 
-	ofstream fout("res/m.bone");
+	ofstream fout("out/m.bone");
 	for(int i = 0; i < 200; i++)
 	{
 		if(list[i])
@@ -53,6 +53,32 @@ void genBoneInfo(int argc, char* argv[])
 			fout << rot.x << " " << rot.y << " " << rot.z << endl;
 			fout << scale.x << " " << scale.y << " " << scale.z << endl;
 		}
+	}
+	fout.close();
+}
+
+void genBoneLink(int argc, char* argv[])
+{
+	if(argc < 1)
+		return;
+
+	Skel skel(argv[1]);
+
+	ofstream fout("out/m.link");
+	fout << skel.m_info.boneNames.size() << endl;
+	for(int i = 0; i < skel.m_info.boneNames.size(); i++)
+	{
+		fout << skel.m_info.boneNames[i] << endl;
+	}
+
+	SkelFrame frame = skel.m_frames[0];
+	for(int i = 0; i < frame.boneDatas.size(); i++)
+	{
+		BoneData dd = frame.boneDatas[i];
+		fout << i << " " << dd.parent << " " << dd.children.size();
+		for(int j = 0; j < dd.children.size(); j++)
+			fout << " " << dd.children[j];
+		fout << endl;
 	}
 	fout.close();
 }
@@ -74,7 +100,8 @@ int main(int argc, char* argv[])
 	//	read_smm(argv[i]);
 	
 
-	genBoneInfo(argc, argv);
+	//genBoneInfo(argc, argv);
+	genBoneLink(argc, argv);
 	
 
 

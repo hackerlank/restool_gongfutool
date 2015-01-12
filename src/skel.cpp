@@ -81,7 +81,7 @@ Skel::Skel(const char* filename)
 
 		uint32 nodeNum;
 		m_file.read((char *)&nodeNum, sizeof(nodeNum));
-		cout << "frame[" << i << "]" << "boneNodes->" << nodeNum << endl;
+		//cout << "frame[" << i << "]" << "boneNodes->" << nodeNum << endl;
 		for(int k = 0; k < nodeNum; k ++)
 		{
 			BoneNode node;
@@ -174,21 +174,7 @@ void Skel::save()
 {
 
 	ofstream fout("res/m.skel");
-	fout << m_info.boneNames.size() << endl;
-	for(int i = 0; i < m_info.boneNames.size(); i++)
-	{
-		//fout << m_info.boneNames[i] << endl;
-	}
-
-	SkelFrame frame = m_frames[0];
-	for(int i = 0; i < frame.boneDatas.size(); i++)
-	{
-		BoneData dd = frame.boneDatas[i];
-		fout << i << " " << dd.parent << " " << dd.children.size();
-		for(int j = 0; j < dd.children.size(); j++)
-			fout << " " << dd.children[j];
-		fout << endl;
-	}
+	
 
 	fout << m_frames.size() << endl;
 	for(int i = 0; i < m_frames.size(); i++)
