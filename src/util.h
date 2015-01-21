@@ -1,6 +1,7 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <cmath>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>

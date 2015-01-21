@@ -194,7 +194,7 @@ void Skel::save()
 		path = path + clist[t] + ".skel";
 		ofstream fout(path.c_str());
 		
-		fout << ilist[t] << endl;
+		fout << ilist[t] << " " << m_frames[0].boneDatas.size() << endl;
 		for(int i = 0; i < ilist[t]; i++,cur++)
 		{
 			SkelFrame frame = m_frames[cur];
@@ -204,8 +204,13 @@ void Skel::save()
 			{
 				BoneData dd = frame.boneDatas[j];
 				fout << fmt(dd.trans.x) << " " << fmt(dd.trans.y) << " " << fmt(dd.trans.z) << endl;
-				fout << fmt(dd.rotat.x) << " " << fmt(dd.rotat.y) << " " << fmt(dd.rotat.z) << endl;
-				fout << dd.mirror << endl;
+				//fout << fmt(dd.rotat.x) << " " << fmt(dd.rotat.y) << " " << fmt(dd.rotat.z) << endl;
+				Quaternion q(dd.trans.x, dd.trans.y, dd.trans.z);
+				fout << fmt(q.x) << " " << fmt(q.y) << " " << fmt(q.z) << " " << fmt(q.w) << endl;
+				if(dd.mirror == 1)
+					fout << "-1 -1 -1" << endl;
+				else
+					fout << "1 1 1" << endl;
 			}
 
 		}

@@ -174,22 +174,22 @@ void Skin::save()
 	path = path + name;
 	ofstream fout(path.c_str());
 
-	fout << m_mtlList.size() << endl;
-	for(int i = 0; i < m_mtlList.size(); i++)
-	{
-		char name[128];
-		Util::fname(m_mtlList[i].map[0], name);
-		fout << name << endl;
-	}
-	fout << endl;
+	//fout << m_mtlList.size() << endl;
+	//for(int i = 0; i < m_mtlList.size(); i++)
+	//{
+	//	char name[128];
+	//	Util::fname(m_mtlList[i].map[0], name);
+	//	fout << name << endl;
+	//}
+	//fout << endl;
 
 
 	fout << m_vertList.size() << endl;
-	fout << endl;
 	for(int i = 0; i < m_vertList.size(); i++)
 	{
 		SkinVert t = m_vertList[i];
-		fout << t.pos.x << " " << t.pos.y << " " << t.pos.z << " " << t.uv.x << " " << t.uv.y << " " << t.bones.size();
+		fout << t.pos.x << " " << t.pos.y << " " << t.pos.z << " " << t.uv.x << " " << t.uv.y << endl;
+		fout << t.bones.size();
 		for(int j = 0; j < t.bones.size(); j++)
 		{
 			SkinBone bone = t.bones[j];
@@ -200,11 +200,16 @@ void Skin::save()
 	}
 
 
-	fout << m_meshList.size() << endl;
+	int total = 0;
+	for(int i = 0; i < m_meshList.size(); i++)
+		total += m_meshList[i].baseFaces.size();
+	fout << total << endl;
+
+	//fout << m_meshList.size() << endl;
 	for(int i = 0; i < m_meshList.size(); i++)
 	{
 		SkinMesh m = m_meshList[i];
-		fout << m.mtlId << " " << m.baseFaces.size() << endl;
+		//fout << m.mtlId << " " << m.baseFaces.size() << endl;
 		for(int j = 0; j < m.baseFaces.size(); j++)
 		{
 			MeshTri t = m.baseFaces[j];
@@ -260,15 +265,15 @@ void Skin::calc(Matrix4f * omList[200], int d)
 				int t = 0;
 				for(t = 0; t < idx; t++)
 				{
-					float dx = abs(v.pos.x - mMat->c[t][0]);
-					float dy = abs(v.pos.y - mMat->c[t][1]);
-					float dz = abs(v.pos.z - mMat->c[t][2]);
+					float dx = fabsf(v.pos.x - mMat->c[t][0]);
+					float dy = fabsf(v.pos.y - mMat->c[t][1]);
+					float dz = fabsf(v.pos.z - mMat->c[t][2]);
 					if(dx < 0.01 && dy < 0.01 && dz < 0.01)
 						break;
 
-					dx = abs(bone.offset.x - vMat->c[t][0]);
-					dy = abs(bone.offset.y - vMat->c[t][1]);
-					dz = abs(bone.offset.z - vMat->c[t][2]);
+					dx = fabsf(bone.offset.x - vMat->c[t][0]);
+					dy = fabsf(bone.offset.y - vMat->c[t][1]);
+					dz = fabsf(bone.offset.z - vMat->c[t][2]);
 					if(dx < 0.01 && dy < 0.01 && dz < 0.01)
 						break;
 
@@ -296,9 +301,9 @@ void Skin::calc(Matrix4f * omList[200], int d)
 					mat->decompose(t, r, s);
 
 					float dt = sqrt(t.x * t.x + t.y * t.y + t.z * t.z);
-					float dx = abs(s.x * s.x - 1);
-					float dy = abs(s.y * s.y - 1);
-					float dz = abs(s.z * s.z - 1);
+					float dx = fabsf(s.x * s.x - 1);
+					float dy = fabsf(s.y * s.y - 1);
+					float dz = fabsf(s.z * s.z - 1);
 					
 					if(d == 0 || dt < 1000 && dx < 0.2 && dy < 0.2 && dz < 0.2)
 					{
