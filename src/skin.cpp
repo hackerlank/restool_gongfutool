@@ -224,7 +224,7 @@ void Skin::save()
 }
 
 
-void Skin::calc(Matrix4f * omList[200], int d)
+void Skin::calc(Matrix4f *omList[200], int omFlag[200], int d, float m)
 {
 	Matrix4f* 	mlist[200] = {0};
 	Matrix4f* 	vlist[200] = {0};
@@ -236,6 +236,8 @@ void Skin::calc(Matrix4f * omList[200], int d)
 		for(int j = 0; j < v.bones.size(); j++)
 		{
 			SkinBone bone = v.bones[j];
+
+			omFlag[bone.boneId] += 1;
 
 			if(omList[bone.boneId] == 0)
 			{
@@ -265,16 +267,22 @@ void Skin::calc(Matrix4f * omList[200], int d)
 				int t = 0;
 				for(t = 0; t < idx; t++)
 				{
+					float dk = v.pos.x * mMat->c[t][0] +
+							   v.pos.y * mMat->c[t][1] +
+							   v.pos.z * mMat->c[t][2];
+					if(dk < 0.2)
+						break;
+	
 					float dx = fabsf(v.pos.x - mMat->c[t][0]);
 					float dy = fabsf(v.pos.y - mMat->c[t][1]);
 					float dz = fabsf(v.pos.z - mMat->c[t][2]);
-					if(dx < 0.01 && dy < 0.01 && dz < 0.01)
+					if(dx < m && dy < m && dz < m)
 						break;
 
 					dx = fabsf(bone.offset.x - vMat->c[t][0]);
 					dy = fabsf(bone.offset.y - vMat->c[t][1]);
 					dz = fabsf(bone.offset.z - vMat->c[t][2]);
-					if(dx < 0.01 && dy < 0.01 && dz < 0.01)
+					if(dx < m && dy < m && dz < m)
 						break;
 
 				}
@@ -305,7 +313,7 @@ void Skin::calc(Matrix4f * omList[200], int d)
 					float dy = fabsf(s.y * s.y - 1);
 					float dz = fabsf(s.z * s.z - 1);
 					
-					if(d == 0 || dt < 1000 && dx < 0.2 && dy < 0.2 && dz < 0.2)
+					if((d == 0 && m == 0) || (dt < 1000000 && dx < 0.001 && dy < 0.001 && dz < 0.001))
 					{
 						omList[bone.boneId] = mat;
 					}

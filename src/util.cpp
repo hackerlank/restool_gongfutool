@@ -2,7 +2,7 @@
 
 float fmt(float n)
 {
-	if(fabsf(n) < 0.001)
+	if(fabsf(n) < 0.0001)
 		return 0;
 	return n;
 }

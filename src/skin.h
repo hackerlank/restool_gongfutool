@@ -87,7 +87,7 @@ public:
 	Material readMaterial(int i);
 
 	void save();
-	void calc(Matrix4f * omList[200], int d);
+	void calc(Matrix4f *omList[200], int omFlag[200], int d, float m);
 public:
 	char 	 m_path[255];
 	ifstream m_file;

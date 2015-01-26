@@ -34,21 +34,29 @@ void read_smm(const char *filename)
 
 void genBoneInfo(int argc, char* argv[])
 {
+	int flag[200] = {0};
 	Matrix4f * list[200] = {0};
-	for(int d = 9; d >= 0; d--)
+
+	for(int t = 8; t >= 0; t--)
 	{
-		for(int i = 1; i < argc; i++)
-		{
-			Skin skin(argv[i]);
-			skin.calc(list, d);
-		}
+		float m = t * 0.1;
+	    for(int d = 4; d >= 0; d--)
+	    {
+	    	for(int i = 1; i < argc; i++)
+	    	{
+	    		Skin skin(argv[i]);
+	    		skin.calc(list, flag, d, m);
+	    	}
+	    }
 	}
 
+	int rr = 0;
 	ofstream fout("out/m.bone");
 	for(int i = 0; i < 200; i++)
 	{
 		if(list[i])
 		{
+			rr++;
 			cout << i << " =================================" << endl;
 			list[i]->print();
 			
@@ -61,24 +69,34 @@ void genBoneInfo(int argc, char* argv[])
 			Quaternion q(rot.x, rot.y, rot.z);
 			fout << fmt(q.x) << " " << fmt(q.y) << " " << fmt(q.z) << " " << fmt(q.w) << endl;
 				
-			if(scale.x - 1 > -0.1 && scale.x - 1 < 0.1)
-				scale.x = 1;
-			if(scale.y - 1 > -0.1 && scale.y - 1 < 0.1)
-				scale.y = 1;
-			if(scale.z - 1 > -0.1 && scale.z - 1 < 0.1)
-				scale.z = 1;
-			
-			if(scale.x + 1 > -0.1 && scale.x + 1 < 0.1)
-				scale.x = -1;
-			if(scale.y + 1 > -0.1 && scale.y + 1 < 0.1)
-				scale.y = -1;
-			if(scale.z + 1 > -0.1 && scale.z + 1 < 0.1)
-				scale.z = -1;
+			//if(scale.x - 1 > -0.1 && scale.x - 1 < 0.1)
+			//	scale.x = 1;
+			//if(scale.y - 1 > -0.1 && scale.y - 1 < 0.1)
+			//	scale.y = 1;
+			//if(scale.z - 1 > -0.1 && scale.z - 1 < 0.1)
+			//	scale.z = 1;
+			//
+			//if(scale.x + 1 > -0.1 && scale.x + 1 < 0.1)
+			//	scale.x = -1;
+			//if(scale.y + 1 > -0.1 && scale.y + 1 < 0.1)
+			//	scale.y = -1;
+			//if(scale.z + 1 > -0.1 && scale.z + 1 < 0.1)
+			//	scale.z = -1;
 
-			fout << scale.x << " " << scale.y << " " << scale.z << " " << endl;
+			//fout << scale.x << " " << scale.y << " " << scale.z << " " << endl;
+			fout << fmt(scale.x) << " " << fmt(scale.y) << " " << fmt(scale.z) << " " << endl;
 		}
 	}
 	fout.close();
+
+	int total = 0;
+	for(int i = 0; i < 200; i++)
+	{
+		if(flag[i] > 0)
+			total ++;
+		cout << "[" << i << "] " << flag[i] << endl;
+	}
+	cout << "total " << total  << " real " << rr << endl;
 }
 
 void genBoneLink(int argc, char* argv[])
@@ -112,8 +130,8 @@ void genBoneLink(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
 	//read_skel("../system/anigirl/rdy1.skel");
-	for(int i = 1; i < argc; i ++)
-		read_skel(argv[i]);
+	//for(int i = 1; i < argc; i ++)
+	//	read_skel(argv[i]);
 	
 	//read_skin("../system/shizhuang/sz_04.skin");
 	//read_skin("../system/avatargirl/ff01_00.skin");
@@ -125,7 +143,7 @@ int main(int argc, char* argv[])
 	//	read_smm(argv[i]);
 	
 
-	//genBoneInfo(argc, argv);
+	genBoneInfo(argc, argv);
 	//genBoneLink(argc, argv);
 	
 
